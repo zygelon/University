@@ -1,12 +1,21 @@
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.Scanner;
 import java.util.concurrent.TimeUnit;
+import javax.swing.*;
+import java.awt.*;
 
 class Global{
     public static volatile int polz=30;
     public static void Show()
     {
-        System.out.println(polz);
+        out.setText(Integer.toString(polz));
     }
+
+    public  static volatile JLabel dout=new JLabel("Debug Info");
+    public static volatile JLabel out=new JLabel("TEST");
+    //This is semafor 0==free,1==first use,2== second use
+    public static volatile int IsFree=0;
 }
 
 class ToTen extends  Thread {
@@ -20,6 +29,11 @@ class ToTen extends  Thread {
                 Global.polz--;
                 Global.Show();
             }
+         /*   try {
+                sleep(1);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
            /* try {
 
                 Thread.sleep(100);
@@ -41,7 +55,14 @@ class To90 extends  Thread {
             if (Global.polz < 90 && !isLock) {
                 Global.polz++;
                 Global.Show();
+
             }
+           /* try {
+                sleep(1);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }*/
 
         }
     }
@@ -51,29 +72,100 @@ class To90 extends  Thread {
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
+        var form=new JFrame();
+        JPanel jPanel=new JPanel();
+        form.add(jPanel);
+        form.setVisible(true);
+        form.setBounds(1000,500,500,500);
+        form.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //jPanel.add(new JButton("ПУСК1"));
+        var Pusk1=new JButton("ПУСК1");
+       /* Pusk1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                Global.out.setText("tttt");
+            }
+        });*/
+        var Pusk2=new JButton("ПУСК2");
+        var Stop1=new JButton("СТОП1");
+        var Stop2=new JButton("СТОП2");
+
+        jPanel.add(Pusk1);
+        jPanel.add(Pusk2);
+        jPanel.add(Stop1);
+        jPanel.add(Stop2);
+        form.setLayout(new FlowLayout());
+        jPanel.add(Global.dout);
+        jPanel.add(Global.out);
+
         // System.out.print(Global.polz);
         //Global.polz=10;
         //System.out.println(Global.polz);
-        var t1 = new ToTen();
+        ToTen t1 = new ToTen();
         var t2 = new To90();
         boolean isStop=false;
-        t1.start();
-        t2.start();
+        //t1.start();
+        //t1.setPriority(Thread.MAX_PRIORITY);
+        //t2.setPriority(Thread.MIN_PRIORITY);
+       // t2.start();
+        Pusk1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                t1.setPriority(Thread.MIN_PRIORITY);
+                if(Global.IsFree==0) {
+                    t1.isLock=false;
+                    Global.IsFree = 1;
+                    if(!t1.isAlive()) t1.start();
+                }
+                else
+                    Global.dout.setText("Занято потоком");
+            }
+        });
+        Pusk2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                t2.setPriority(Thread.MAX_PRIORITY);
+                if (Global.IsFree == 0) {
+                    t2.isLock=false;
+                    Global.IsFree = 2;
+                    if(!t2.isAlive())t2.start();
+                }
+                else
+                    Global.dout.setText("Занято потоком");
+
+            }
+        });
+        Stop1.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(Global.IsFree==1) {
+                    t1.isLock = true;
+                    //t1.interrupt();
+
+                    Global.IsFree=0;
+                }
+                else if(Global.IsFree==2)
+                    Global.dout.setText("Занято потоком 2");
+            }
+        });
+
+        Stop2.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent actionEvent) {
+                if(Global.IsFree==2)
+                {
+                    t2.isLock=true;
+                    //t2.interrupt();
+                    Global.IsFree=0;
+                }
+                else if(Global.IsFree==1)
+                    Global.dout.setText("Занято потоком 1");
+            }
+        });
         //Thread.sleep(100);
-/*        try {
-            TimeUnit.SECONDS.sleep(1000l);
-        }
-        catch(InterruptedException ex)
-        {
-            Thread.currentThread().interrupt();
-        }
 
-    t1.interrupt();
-    t2.interrupt();
-        System.out.printf("Stop");
- */
 
-        Scanner in = new Scanner(System.in);
+       /* Scanner in = new Scanner(System.in);
 
         try {
             TimeUnit.MILLISECONDS.sleep(3000);
@@ -85,19 +177,12 @@ public class Main {
 
         while (!isStop) {
 
-            /*try {
-                TimeUnit.SECONDS.sleep(2);
-            }
-            catch(InterruptedException ex)
-            {
-                Thread.currentThread().interrupt();
-            }*/
+
 //            try {
 
                 t1.isLock=true;
                 t2.isLock=true;
-/*            }
-            catch (InterruptedException ex){t1.interrupt();t2.interrupt();}*/
+
             try {
                 TimeUnit.MILLISECONDS.sleep(500);
             }
@@ -142,5 +227,9 @@ public class Main {
 
         }
         System.out.println("Return 0");
+
+*/
+       // ar.setVisible(true);
+
     }
 }
