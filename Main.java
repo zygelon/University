@@ -7,11 +7,13 @@ import java.awt.*;
 
 class Global{
     public static volatile int polz=30;
-    public static void Show()
+    //public static void Show()
     {
-        out.setText(Integer.toString(polz));
+       // out.setText(Integer.toString(polz));
     }
-
+    public  static void update(){pr.setValue(polz);}
+    public  static volatile JProgressBar pr=new JProgressBar(10,90);
+    public static JSlider slider = new JSlider(10, 90, 45);
     public  static volatile JLabel dout=new JLabel("Debug Info");
     public static volatile JLabel out=new JLabel("TEST");
     //This is semafor 0==free,1==first use,2== second use
@@ -25,9 +27,11 @@ class ToTen extends  Thread {
     @Override
     public void run() {
         while (!IsStop) {
-            if (Global.polz > 10 && !isLock) {
+            if ( !isLock)if(Global.polz > 10) {
                 Global.polz--;
-                Global.Show();
+
+         //       Global.slider.updateUI();
+      //          Global.Show();
             }
          /*   try {
                 sleep(1);
@@ -52,9 +56,11 @@ class To90 extends  Thread {
     @Override
     public void run() {
         while (!IsStop) {
-            if (Global.polz < 90 && !isLock) {
+            if (!isLock)if(Global.polz < 90) {
+                //Global.slider.setValue(Global.slider.getValue()+1);
                 Global.polz++;
-                Global.Show();
+              //  Global.slider.updateUI();
+           //     Global.Show();
 
             }
            /* try {
@@ -68,10 +74,24 @@ class To90 extends  Thread {
     }
 }
 
+class Upd extends  Thread
+{
+    @Override
+    public void run()
+    {
+        while (true) {
+            Global.update();
+        }
+    }
+}
 
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {
+        var upd=new Upd();
+
+
+
         var form=new JFrame();
         JPanel jPanel=new JPanel();
         form.add(jPanel);
@@ -89,6 +109,7 @@ public class Main {
         var Pusk2=new JButton("ПУСК2");
         var Stop1=new JButton("СТОП1");
         var Stop2=new JButton("СТОП2");
+        //jPanel.add(Global.slider);
 
         jPanel.add(Pusk1);
         jPanel.add(Pusk2);
@@ -97,7 +118,7 @@ public class Main {
         form.setLayout(new FlowLayout());
         jPanel.add(Global.dout);
         jPanel.add(Global.out);
-
+        jPanel.add(Global.pr);
         // System.out.print(Global.polz);
         //Global.polz=10;
         //System.out.println(Global.polz);
@@ -108,6 +129,7 @@ public class Main {
         //t1.setPriority(Thread.MAX_PRIORITY);
         //t2.setPriority(Thread.MIN_PRIORITY);
        // t2.start();
+        upd.start();
         Pusk1.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent actionEvent) {
@@ -146,6 +168,7 @@ public class Main {
                 }
                 else if(Global.IsFree==2)
                     Global.dout.setText("Занято потоком 2");
+            //    Global.out.setText(Integer.toString(Global.IsFree));
             }
         });
 
@@ -160,6 +183,7 @@ public class Main {
                 }
                 else if(Global.IsFree==1)
                     Global.dout.setText("Занято потоком 1");
+           //     Global.out.setText(Integer.toString(Global.IsFree));
             }
         });
         //Thread.sleep(100);
